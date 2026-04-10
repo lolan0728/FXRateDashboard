@@ -1,0 +1,627 @@
+<Window x:Class="FXRateDashboard.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Settings"
+        Width="392"
+        MinWidth="392"
+        SizeToContent="Height"
+        WindowStartupLocation="Manual"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <SolidColorBrush x:Key="WindowBorderBrush" Color="#E8EDF4" />
+        <SolidColorBrush x:Key="WindowSurfaceBrush" Color="White" />
+        <SolidColorBrush x:Key="CardSurfaceBrush" Color="#F5F8FC" />
+        <SolidColorBrush x:Key="CardSurfaceAccentBrush" Color="#F8FBFE" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#E3EAF2" />
+        <SolidColorBrush x:Key="InputBackgroundBrush" Color="#FCFDFE" />
+        <SolidColorBrush x:Key="InputBorderBrush" Color="#D7E0EA" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#192332" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#708093" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#59C64A" />
+        <SolidColorBrush x:Key="AccentBrushDark" Color="#46B03A" />
+        <SolidColorBrush x:Key="AccentTintBrush" Color="#EDF9EA" />
+        <SolidColorBrush x:Key="IconStrokeBrush" Color="#8E9AA9" />
+
+        <LinearGradientBrush x:Key="CardBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#F8FBFE" Offset="0" />
+            <GradientStop Color="#F3F7FB" Offset="1" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="PrimaryActionBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#62D255" Offset="0" />
+            <GradientStop Color="#49B73F" Offset="1" />
+        </LinearGradientBrush>
+
+        <Style x:Key="WindowCloseButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="#6B7A8C" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="0,24,0,0">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#E81123" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Opacity" Value="0.78" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SettingCardStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style x:Key="IconHostStyle" TargetType="Viewbox">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="CardLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HintTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{StaticResource InputBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <Border x:Name="FieldBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="16" />
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="0"
+                                          VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="FieldBorder" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="FieldBorder" Property="Opacity" Value="0.55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallHintLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SecondaryActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="102" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="#F7FAFC" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="#D8E1EA" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#F1F5F9" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryActionButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryActionButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource PrimaryActionBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#46B43C" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.84" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TokenClearButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Background" Value="#E6EBF1" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="#6F7D8E" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Background" Value="#DCE4ED" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.82" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SwitchCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Width="52" Height="30">
+                            <Border x:Name="Track"
+                                    Background="#E3EAF1"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="15" />
+                            <Ellipse x:Name="Thumb"
+                                     Width="20"
+                                     Height="20"
+                                     Margin="5,0,0,0"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Center"
+                                     Fill="White">
+                                <Ellipse.Effect>
+                                    <DropShadowEffect BlurRadius="8"
+                                                      ShadowDepth="2"
+                                                      Color="#22000000"
+                                                      Opacity="0.28" />
+                                </Ellipse.Effect>
+                            </Ellipse>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{StaticResource PrimaryActionBrush}" />
+                                <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource AccentBrushDark}" />
+                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                                <Setter TargetName="Thumb" Property="Margin" Value="0,0,5,0" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Track" Property="Opacity" Value="0.88" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Border Margin="10"
+                Background="{StaticResource WindowSurfaceBrush}"
+                BorderBrush="{StaticResource WindowBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="24">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20"
+                                  ShadowDepth="6"
+                                  Opacity="0.14"
+                                  Color="#220F1720" />
+            </Border.Effect>
+        </Border>
+
+        <Grid Margin="14,12,14,18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Height="32"
+                  Background="Transparent"
+                  MouseLeftButtonDown="TitleBar_OnMouseLeftButtonDown">
+                <TextBlock Text="Settings"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontSize="17"
+                           FontWeight="SemiBold" />
+            </Grid>
+
+            <StackPanel Grid.Row="1"
+                        Margin="0,10,0,0">
+                <Border Style="{StaticResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Viewbox Grid.Column="0" Style="{StaticResource IconHostStyle}">
+                            <Grid Width="24" Height="24">
+                                <Ellipse Width="22"
+                                         Height="22"
+                                         Stroke="{StaticResource IconStrokeBrush}"
+                                         StrokeThickness="1.6" />
+                                <Path Data="M6.5,9.5 H14.8 M12.3,7.1 L14.8,9.5 L12.3,11.9 M17.5,14.5 H9.2 M11.7,12.1 L9.2,14.5 L11.7,16.9"
+                                      Stroke="{StaticResource IconStrokeBrush}"
+                                      StrokeThickness="1.5"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round" />
+                            </Grid>
+                        </Viewbox>
+
+                        <TextBlock Grid.Column="2"
+                                   Style="{StaticResource CardLabelStyle}"
+                                   Text="Currency Pair" />
+
+                        <Grid Grid.Column="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     Text="{Binding BaseCurrency, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="3"
+                                     CharacterCasing="Upper" />
+
+                            <TextBlock Grid.Column="1"
+                                       Text="->"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="13"
+                                       Foreground="{StaticResource TextMutedBrush}" />
+
+                            <TextBox Grid.Column="2"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     Text="{Binding QuoteCurrency, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="3"
+                                     CharacterCasing="Upper" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Viewbox Grid.Column="0" Style="{StaticResource IconHostStyle}">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="3" Canvas.Top="3" Width="12" Height="5" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.4" />
+                                <Path Data="M3,5.5 V10.5 C3,12.5 15,12.5 15,10.5 V5.5 M3,10.5 C3,12.5 15,12.5 15,10.5 M3,10.5 V15.5 C3,17.5 15,17.5 15,15.5 V10.5" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.4" Fill="Transparent" StrokeLineJoin="Round" />
+                                <Ellipse Canvas.Left="15" Canvas.Top="9.5" Width="6.5" Height="6.5" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.2" />
+                                <Path Data="M18.2,11.1 V14.2 M17,11.8 H19.4 M17,13.1 H19.4"
+                                      Stroke="{StaticResource IconStrokeBrush}"
+                                      StrokeThickness="0.9"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" />
+                            </Canvas>
+                        </Viewbox>
+
+                        <TextBlock Grid.Column="2"
+                                   Style="{StaticResource CardLabelStyle}"
+                                   Text="Base Amount" />
+
+                        <TextBox Grid.Column="4"
+                                 Style="{StaticResource InputTextBoxStyle}"
+                                 Text="{Binding BaseAmountText, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Viewbox Grid.Column="0" Style="{StaticResource IconHostStyle}">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="4" Canvas.Top="4" Width="16" Height="16" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.5" />
+                                <Path Data="M12,8 V12 L15.5,14.5" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                <Path Data="M18.2,17.2 L20.5,19.5" Stroke="{StaticResource IconStrokeBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                            </Canvas>
+                        </Viewbox>
+
+                        <TextBlock Grid.Column="2"
+                                   Style="{StaticResource CardLabelStyle}"
+                                   Text="Refresh Interval" />
+
+                        <StackPanel Grid.Column="4"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource InputTextBoxStyle}"
+                                     Width="64"
+                                     Text="{Binding RefreshSecondsText, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{StaticResource HintTextStyle}"
+                                       Text="Seconds" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Viewbox Grid.Column="0" Style="{StaticResource IconHostStyle}">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="3.5"
+                                         Canvas.Top="3.5"
+                                         Width="10"
+                                         Height="10"
+                                         Stroke="{StaticResource IconStrokeBrush}"
+                                         StrokeThickness="1.6" />
+                                <Ellipse Canvas.Left="7"
+                                         Canvas.Top="7"
+                                         Width="2.2"
+                                         Height="2.2"
+                                         Fill="{StaticResource IconStrokeBrush}" />
+                                <Path Data="M12.2,12.1 L20.2,20.1 M16.7,16.6 L18.8,14.5 M18.8,18.7 L20.9,16.6"
+                                      Stroke="{StaticResource IconStrokeBrush}"
+                                      StrokeThickness="1.7"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round" />
+                            </Canvas>
+                        </Viewbox>
+
+                        <TextBlock Grid.Column="2"
+                                   Style="{StaticResource CardLabelStyle}"
+                                   Text="Wise API Token" />
+
+                        <Grid Grid.Column="4">
+                            <TextBox x:Name="ApiTokenBox"
+                                     Style="{StaticResource InputTextBoxStyle}"
+                                     FontSize="12"
+                                     FontWeight="SemiBold"
+                                     Padding="12,0,30,0"
+                                     TextChanged="ApiTokenBox_OnTextChanged"
+                                     GotKeyboardFocus="ApiTokenBox_OnFocusChanged"
+                                     LostKeyboardFocus="ApiTokenBox_OnFocusChanged"
+                                     Text="{Binding ApiTokenText, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button x:Name="ClearTokenButton"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,8,0"
+                                    Style="{StaticResource TokenClearButtonStyle}"
+                                    Click="ClearTokenButton_OnClick">
+                                <Path Data="M2.5,2.5 L7.5,7.5 M7.5,2.5 L2.5,7.5"
+                                      Width="10"
+                                      Height="10"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" />
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Margin="0"
+                        Style="{StaticResource SettingCardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="26" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="108" />
+                            <ColumnDefinition Width="6" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Viewbox Grid.Column="0" Style="{StaticResource IconHostStyle}">
+                            <Path Data="M19.43 12.98C19.47 12.66 19.5 12.34 19.5 12C19.5 11.66 19.47 11.34 19.43 11.02L21.3 9.56C21.47 9.43 21.52 9.2 21.41 9L19.64 5.94C19.53 5.74 19.31 5.67 19.11 5.75L16.91 6.64C16.45 6.29 15.95 5.99 15.4 5.77L15.07 3.43C15.03 3.22 14.85 3.06 14.63 3.06H11.09C10.87 3.06 10.69 3.22 10.65 3.43L10.32 5.77C9.77 5.99 9.27 6.29 8.81 6.64L6.61 5.75C6.41 5.67 6.19 5.74 6.08 5.94L4.31 9C4.2 9.2 4.25 9.43 4.42 9.56L6.29 11.02C6.25 11.34 6.22 11.66 6.22 12C6.22 12.34 6.25 12.66 6.29 12.98L4.42 14.44C4.25 14.57 4.2 14.8 4.31 15L6.08 18.06C6.19 18.26 6.41 18.33 6.61 18.25L8.81 17.36C9.27 17.71 9.77 18.01 10.32 18.23L10.65 20.57C10.69 20.78 10.87 20.94 11.09 20.94H14.63C14.85 20.94 15.03 20.78 15.07 20.57L15.4 18.23C15.95 18.01 16.45 17.71 16.91 17.36L19.11 18.25C19.31 18.33 19.53 18.26 19.64 18.06L21.41 15C21.52 14.8 21.47 14.57 21.3 14.44L19.43 12.98ZM12.86 15.14C11.16 15.14 9.79 13.77 9.79 12.07C9.79 10.37 11.16 9 12.86 9C14.56 9 15.93 10.37 15.93 12.07C15.93 13.77 14.56 15.14 12.86 15.14Z"
+                                  Fill="{StaticResource IconStrokeBrush}" />
+                        </Viewbox>
+
+                        <TextBlock Grid.Column="2"
+                                   Style="{StaticResource CardLabelStyle}"
+                                   Text="Options" />
+
+                        <StackPanel Grid.Column="4">
+                            <Grid Margin="0,2,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Lock widget position"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+
+                                <CheckBox Grid.Column="1"
+                                          Style="{StaticResource SwitchCheckBoxStyle}"
+                                          IsChecked="{Binding LockPosition}" />
+                            </Grid>
+
+                            <Grid Margin="0,16,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="Launch at startup"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+
+                                <CheckBox Grid.Column="1"
+                                          Style="{StaticResource SwitchCheckBoxStyle}"
+                                          IsChecked="{Binding LaunchAtStartup}" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <Border x:Name="ValidationBanner"
+                    Grid.Row="2"
+                    Margin="0,10,0,0"
+                    Padding="10,8"
+                    Background="#FFF6EDEE"
+                    BorderBrush="#F3C8CD"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="Collapsed">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="!"
+                               Width="18"
+                               Height="18"
+                               Margin="0,0,8,0"
+                               TextAlignment="Center"
+                               Foreground="#C33A3A"
+                               FontSize="13"
+                               FontWeight="Bold" />
+                    <TextBlock x:Name="ValidationMessageText"
+                               Foreground="#9C2E34"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap" />
+                </DockPanel>
+            </Border>
+
+            <StackPanel Grid.Row="3"
+                        Margin="0,14,0,4"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Content="Cancel"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource SecondaryActionButtonStyle}"
+                        Click="CancelButton_OnClick" />
+
+                <Button Content="Save"
+                        Style="{StaticResource PrimaryActionButtonStyle}"
+                        Click="SaveButton_OnClick" />
+            </StackPanel>
+        </Grid>
+
+        <Button Style="{StaticResource WindowCloseButtonStyle}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,10,10,0"
+                Click="CloseButton_OnClick">
+            <Path Data="M2,2 L14,14 M14,2 L2,14"
+                  Width="14"
+                  Height="14"
+                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                  StrokeThickness="1.8"
+                  StrokeStartLineCap="Round"
+                  StrokeEndLineCap="Round" />
+        </Button>
+    </Grid>
+</Window>

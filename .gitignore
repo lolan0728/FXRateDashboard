@@ -1,0 +1,12 @@
+.vs/
+.dotnet_cli_home/
+
+bin/
+obj/
+
+*.user
+*.suo
+*.cache
+*.pdb
+
+TestResults/
