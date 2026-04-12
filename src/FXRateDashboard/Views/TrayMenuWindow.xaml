@@ -65,7 +65,7 @@
 
         <StackPanel>
             <Button Style="{StaticResource TrayMenuButtonStyle}"
-                    Click="ShowWidgetButton_Click">
+                    Click="ToggleVisibilityButton_Click">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -91,7 +91,35 @@
                     </Grid>
 
                     <TextBlock Grid.Column="1"
-                               Text="Show Window"
+                               Text="{Binding ToggleVisibilityMenuText}"
+                               Margin="8,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12" />
+                </Grid>
+            </Button>
+
+            <Button Style="{StaticResource TrayMenuButtonStyle}"
+                    Click="ToggleModeButton_Click">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Viewbox Width="12"
+                             Height="12"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center">
+                        <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.4"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Stretch="Uniform"
+                              Data="M2,10 L6,6 L9,8 L14,3" />
+                    </Viewbox>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding ToggleModeMenuText}"
                                Margin="8,0,0,0"
                                VerticalAlignment="Center"
                                FontSize="12" />

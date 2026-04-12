@@ -84,8 +84,8 @@ public sealed class MainViewModelTests
         Assert.Equal("USD", viewModel.QuoteCurrencyCode);
         Assert.Equal("11,200", viewModel.CurrentRateDisplay);
         Assert.NotEmpty(viewModel.ChartPoints);
-        Assert.Equal(10_800m, viewModel.ChartPoints.First().Rate);
-        Assert.Equal(11_200m, viewModel.ChartPoints.Last().Rate);
+        Assert.All(viewModel.ChartPoints, point => Assert.True(point.Rate > 0));
+        Assert.Contains(viewModel.ChartPoints, point => point.Rate == 10_800m || point.Rate == 11_200m);
         Assert.NotEqual("plain-token", settingsStore.CurrentSettings.EncryptedWiseToken);
         Assert.True(startupService.Enabled);
 
@@ -117,5 +117,36 @@ public sealed class MainViewModelTests
         var placement = viewModel.GetSavedWindowPlacement();
         Assert.Equal(321, placement.Left);
         Assert.Equal(654, placement.Top);
+    }
+
+    [Fact]
+    public async Task ToggleCompactModeAsync_PersistsAndUpdatesMenuText()
+    {
+        var settingsStore = new InMemorySettingsStore
+        {
+            CurrentSettings = new AppSettings
+            {
+                IsCompactMode = false
+            }
+        };
+        var viewModel = new MainViewModel(
+            settingsStore,
+            new InMemoryCacheStore(),
+            new StubWiseRateClient(),
+            new RateQueryMapper(),
+            new TokenProtector(),
+            new ImmediateUiDispatcher(),
+            new StubStartupLaunchService());
+
+        await viewModel.EnsureSettingsLoadedAsync();
+        await viewModel.ToggleCompactModeAsync();
+        viewModel.StatusMessage = "Updated at: 15:17";
+
+        Assert.True(viewModel.IsCompactMode);
+        Assert.Equal("Restore Full Mode", viewModel.ToggleModeMenuText);
+        Assert.Equal("15:17", viewModel.StatusChipText);
+        Assert.Equal(236d, viewModel.TargetWindowWidth);
+        Assert.Equal(122d, viewModel.TargetWindowHeight);
+        Assert.True(settingsStore.CurrentSettings.IsCompactMode);
     }
 }

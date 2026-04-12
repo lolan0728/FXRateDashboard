@@ -1,17 +1,20 @@
 using System.Windows;
+using FXRateDashboard.ViewModels;
 using Forms = System.Windows.Forms;
 
 namespace FXRateDashboard.Views;
 
 public partial class TrayMenuWindow : Window
 {
-    public event EventHandler? ShowWidgetRequested;
+    public event EventHandler? ToggleVisibilityRequested;
+    public event EventHandler? ToggleModeRequested;
     public event EventHandler? SettingsRequested;
     public event EventHandler? QuitRequested;
 
-    public TrayMenuWindow()
+    public TrayMenuWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
         Deactivated += (_, _) => Hide();
     }
 
@@ -23,10 +26,19 @@ public partial class TrayMenuWindow : Window
             return;
         }
 
+        ShowAtCursor();
+    }
+
+    public void ShowAtCursor()
+    {
         var cursor = Forms.Control.MousePosition;
         var workArea = Forms.Screen.GetWorkingArea(cursor);
 
-        Show();
+        if (!IsVisible)
+        {
+            Show();
+        }
+
         Activate();
         UpdateLayout();
 
@@ -37,10 +49,16 @@ public partial class TrayMenuWindow : Window
         Top = Math.Max(workArea.Top + 8, Top);
     }
 
-    private void ShowWidgetButton_Click(object sender, RoutedEventArgs e)
+    private void ToggleVisibilityButton_Click(object sender, RoutedEventArgs e)
     {
         Hide();
-        ShowWidgetRequested?.Invoke(this, EventArgs.Empty);
+        ToggleVisibilityRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ToggleModeButton_Click(object sender, RoutedEventArgs e)
+    {
+        Hide();
+        ToggleModeRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)

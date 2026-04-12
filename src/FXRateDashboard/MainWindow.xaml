@@ -20,7 +20,8 @@
         Topmost="False"
         Opacity="1"
         ShowInTaskbar="False"
-        SnapsToDevicePixels="True">
+        SnapsToDevicePixels="True"
+        PreviewMouseRightButtonUp="Window_OnPreviewMouseRightButtonUp">
     <Window.Resources>
         <Style x:Key="RangeButtonStyle" TargetType="Button" BasedOn="{StaticResource WidgetTextButtonStyle}">
             <Setter Property="Padding" Value="12,7" />
@@ -34,81 +35,97 @@
     </Window.Resources>
 
     <Grid>
-        <Border Margin="10"
+        <Border Margin="{Binding WidgetOuterMargin}"
                 Background="{Binding PanelBackgroundBrush}"
                 BorderBrush="{StaticResource PanelEdgeBrush}"
                 BorderThickness="1"
-                CornerRadius="28">
+                CornerRadius="{Binding WidgetCornerRadius}">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="28" ShadowDepth="8" Opacity="0.18" Color="#2A163300" />
             </Border.Effect>
         </Border>
 
-        <Border Margin="10"
-                CornerRadius="28"
-                Padding="18">
+        <Border Margin="{Binding WidgetOuterMargin}"
+                CornerRadius="{Binding WidgetCornerRadius}"
+                Padding="{Binding WidgetContentPadding}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition x:Name="HeaderRow" Height="Auto" />
+                    <RowDefinition x:Name="ValueRow" Height="Auto" />
+                    <RowDefinition x:Name="ChartRow" Height="*" />
+                    <RowDefinition x:Name="FooterRow" Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <DockPanel Grid.Row="0"
                            LastChildFill="False"
                            Background="Transparent"
                            MouseLeftButtonDown="DragSurface_OnMouseLeftButtonDown">
-                    <Border Background="{Binding AccentBrush}" CornerRadius="12" Padding="10,5">
+                    <Border Background="{Binding AccentBrush}" CornerRadius="12" Padding="{Binding PairLabelPadding}">
                         <TextBlock Text="{Binding PairLabel}"
                                    Foreground="{Binding PrimaryTextBrush}"
-                                   FontSize="12"
+                                   FontSize="{Binding PairLabelFontSize}"
                                    FontWeight="SemiBold" />
                     </Border>
 
                     <Border DockPanel.Dock="Right"
                             Margin="8,0,0,0"
+                            MinWidth="{Binding StatusChipMinWidth}"
                             Background="{Binding StatusChipBackgroundBrush}"
                             BorderBrush="{StaticResource PanelEdgeBrush}"
                             BorderThickness="1"
                             CornerRadius="12"
-                            Padding="8,4">
+                            Padding="{Binding StatusChipPadding}">
                         <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding StatusMessage}"
+                                   Text="{Binding StatusChipText}"
                                    Foreground="{Binding MutedTextBrush}"
-                                   FontSize="11" />
+                                   FontSize="{Binding StatusFontSize}" />
                     </Border>
                 </DockPanel>
 
                 <StackPanel Grid.Row="1"
-                            Margin="0,8,0,0"
+                            Margin="{Binding ValueSectionMargin}"
                             MouseLeftButtonDown="DragSurface_OnMouseLeftButtonDown">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding CurrentRateDisplay}"
                                    Foreground="{Binding PrimaryTextBrush}"
-                                   FontSize="42"
+                                   FontSize="{Binding CurrentValueFontSize}"
                                    FontWeight="SemiBold"
                                    FontFamily="Segoe UI Variable Display" />
-                        <TextBlock Margin="10,16,0,0"
+                        <TextBlock Margin="{Binding QuoteCurrencyMargin}"
                                    Text="{Binding QuoteCurrencyCode}"
                                    Foreground="{Binding MutedTextBrush}"
-                                   FontSize="13"
+                                   FontSize="{Binding QuoteCurrencyFontSize}"
                                    FontWeight="SemiBold" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding ChangeDisplay}"
-                                   Foreground="{Binding TrendBrush}"
-                                   FontSize="15"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Margin="8,0,0,0"
-                                   Text="{Binding ChangePercentDisplay}"
-                                   Foreground="{Binding TrendBrush}"
-                                   FontSize="15"
-                                   FontWeight="SemiBold" />
-                    </StackPanel>
+                    <DockPanel LastChildFill="False"
+                               Margin="{Binding ChangeRowMargin}">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="{Binding ChangeGroupMargin}">
+                            <TextBlock Text="{Binding ChangeDisplay}"
+                                       Foreground="{Binding TrendBrush}"
+                                       FontSize="{Binding ChangeFontSize}"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Margin="8,0,0,0"
+                                       Text="{Binding ChangePercentDisplay}"
+                                       Foreground="{Binding TrendBrush}"
+                                       FontSize="{Binding ChangeFontSize}"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="CompactSourceText"
+                                   DockPanel.Dock="Right"
+                                   Margin="{Binding CompactSourceMargin}"
+                                   VerticalAlignment="Center"
+                                   Text="Wise"
+                                   Foreground="{Binding MutedTextBrush}"
+                                   FontSize="{Binding CompactSourceFontSize}"
+                                   FontWeight="SemiBold"
+                                   Visibility="Collapsed" />
+                    </DockPanel>
                 </StackPanel>
 
-                <Border Grid.Row="2"
+                <Border x:Name="ChartPanel"
+                        Grid.Row="2"
                         Margin="0,8,0,10"
                         Padding="6,4,6,8"
                         Background="{Binding ChartCardBackgroundBrush}"
@@ -122,7 +139,9 @@
                                              StrokeBrush="{Binding TrendBrush}" />
                 </Border>
 
-                <DockPanel Grid.Row="3" LastChildFill="False">
+                <DockPanel x:Name="FooterPanel"
+                           Grid.Row="3"
+                           LastChildFill="False">
                     <StackPanel Orientation="Horizontal">
                         <Button Content="1D"
                                 Command="{Binding SelectRangeCommand}"
@@ -240,7 +259,7 @@
                     </StackPanel>
 
                     <TextBlock DockPanel.Dock="Right"
-                               Margin="12,0,0,0"
+                               Margin="{Binding FooterSourceMargin}"
                                VerticalAlignment="Center"
                                Text="Wise"
                                Foreground="{Binding MutedTextBrush}"

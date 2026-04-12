@@ -102,7 +102,8 @@ public partial class App : WpfApplication
     private void InitializeTray(MainWindow mainWindow)
     {
         _trayMenuWindow = _host!.Services.GetRequiredService<TrayMenuWindow>();
-        _trayMenuWindow.ShowWidgetRequested += (_, _) => Dispatcher.Invoke(() => ShowWidget(mainWindow));
+        _trayMenuWindow.ToggleVisibilityRequested += (_, _) => Dispatcher.Invoke(mainWindow.ToggleVisibilityFromMenu);
+        _trayMenuWindow.ToggleModeRequested += async (_, _) => await Dispatcher.InvokeAsync(mainWindow.ToggleModeFromMenuAsync);
         _trayMenuWindow.SettingsRequested += (_, _) => Dispatcher.Invoke(mainWindow.OpenSettingsFromTray);
         _trayMenuWindow.QuitRequested += (_, _) => Dispatcher.Invoke(mainWindow.Close);
 
@@ -184,21 +185,10 @@ public partial class App : WpfApplication
 
     private static void ShowWidget(MainWindow mainWindow)
     {
-        if (!mainWindow.IsVisible)
-        {
-            mainWindow.Show();
-        }
+        mainWindow.RestoreFromTray();
 
-        if (mainWindow.WindowState == System.Windows.WindowState.Minimized)
-        {
-            mainWindow.WindowState = System.Windows.WindowState.Normal;
-        }
-
-        // Briefly elevate z-order so the widget becomes discoverable without staying topmost.
         var originalTopmost = mainWindow.Topmost;
         mainWindow.Topmost = true;
-        mainWindow.Activate();
-        mainWindow.Focus();
         mainWindow.Topmost = originalTopmost;
     }
 }

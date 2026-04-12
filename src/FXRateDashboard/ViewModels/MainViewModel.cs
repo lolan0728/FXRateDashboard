@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -140,6 +141,62 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isOffline = true;
+
+    [ObservableProperty]
+    private bool _isCompactMode;
+
+    [ObservableProperty]
+    private bool _isWindowVisible = true;
+
+    public string ToggleModeMenuText => IsCompactMode ? "Restore Full Mode" : "Compact Mode";
+
+    public string ToggleVisibilityMenuText => IsWindowVisible ? "Hide Window" : "Show Window";
+
+    public Visibility CompactSourceVisibility => IsCompactMode ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility FullFooterVisibility => IsCompactMode ? Visibility.Collapsed : Visibility.Visible;
+
+    public string StatusChipText => IsCompactMode ? ExtractCompactStatusText(StatusMessage) : StatusMessage;
+
+    public double TargetWindowWidth => IsCompactMode ? 236d : 404d;
+
+    public double TargetWindowHeight => IsCompactMode ? 122d : 410d;
+
+    public Thickness WidgetOuterMargin => IsCompactMode ? new Thickness(7) : new Thickness(10);
+
+    public CornerRadius WidgetCornerRadius => IsCompactMode ? new CornerRadius(24) : new CornerRadius(28);
+
+    public Thickness WidgetContentPadding => IsCompactMode ? new Thickness(9, 9, 9, 8) : new Thickness(18);
+
+    public double PairLabelFontSize => IsCompactMode ? 10d : 12d;
+
+    public Thickness PairLabelPadding => IsCompactMode ? new Thickness(7, 4, 7, 4) : new Thickness(10, 5, 10, 5);
+
+    public Thickness StatusChipPadding => IsCompactMode ? new Thickness(7, 3, 7, 3) : new Thickness(8, 4, 8, 4);
+
+    public double StatusFontSize => IsCompactMode ? 9d : 11d;
+
+    public double StatusChipMinWidth => IsCompactMode ? 40d : 0d;
+
+    public Thickness ValueSectionMargin => IsCompactMode ? new Thickness(0, 4, 0, 0) : new Thickness(0, 8, 0, 0);
+
+    public double CurrentValueFontSize => IsCompactMode ? 27d : 42d;
+
+    public Thickness QuoteCurrencyMargin => IsCompactMode ? new Thickness(6, 8, 0, 0) : new Thickness(10, 16, 0, 0);
+
+    public double QuoteCurrencyFontSize => IsCompactMode ? 10d : 13d;
+
+    public double ChangeFontSize => IsCompactMode ? 11d : 15d;
+
+    public Thickness ChangeGroupMargin => IsCompactMode ? new Thickness(6, 0, 0, 0) : new Thickness(4, 0, 0, 0);
+
+    public Thickness ChangeRowMargin => IsCompactMode ? new Thickness(0, 8, 0, 0) : new Thickness(0);
+
+    public Thickness CompactSourceMargin => IsCompactMode ? new Thickness(10, 0, 6, 0) : new Thickness(12, 0, 0, 0);
+
+    public double CompactSourceFontSize => IsCompactMode ? 10d : 11d;
+
+    public Thickness FooterSourceMargin => IsCompactMode ? new Thickness(12, 0, 0, 0) : new Thickness(18, 0, 0, 0);
 
     public async Task InitializeAsync()
     {
@@ -288,6 +345,7 @@ public partial class MainViewModel : ObservableObject
             PairLabel = BuildPairLabel(_settings);
             QuoteCurrencyCode = _settings.QuoteCurrency;
             ActiveRange = _settings.ActiveRange;
+            IsCompactMode = _settings.IsCompactMode;
             AlwaysOnTop = false;
             IsPositionLocked = _settings.LockPosition;
             PanelOpacity = 1.0;
@@ -562,6 +620,23 @@ public partial class MainViewModel : ObservableObject
         return !string.IsNullOrWhiteSpace(NormalizeStoredOrRawToken(_settings.EncryptedWiseToken));
     }
 
+    public async Task ToggleCompactModeAsync()
+    {
+        _settings.IsCompactMode = !_settings.IsCompactMode;
+        await _settingsStore.SaveAsync(_settings);
+        await _uiDispatcher.InvokeAsync(() => IsCompactMode = _settings.IsCompactMode);
+    }
+
+    public void SetWindowVisible(bool isVisible)
+    {
+        if (IsWindowVisible == isVisible)
+        {
+            return;
+        }
+
+        IsWindowVisible = isVisible;
+    }
+
     private string GetTokenOrThrow()
     {
         var token = NormalizeStoredOrRawToken(_settings.EncryptedWiseToken);
@@ -656,5 +731,60 @@ public partial class MainViewModel : ObservableObject
         return timestampUtc.HasValue
             ? $"Updated at: {timestampUtc.Value.ToLocalTime():HH:mm}"
             : "Updated at: --";
+    }
+
+    private static string ExtractCompactStatusText(string? statusMessage)
+    {
+        if (string.IsNullOrWhiteSpace(statusMessage))
+        {
+            return "--";
+        }
+
+        const string prefix = "Updated at:";
+        if (statusMessage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            var compactTime = statusMessage[prefix.Length..].Trim();
+            return string.IsNullOrWhiteSpace(compactTime) ? "--" : compactTime;
+        }
+
+        return statusMessage.Trim();
+    }
+
+    partial void OnStatusMessageChanged(string value)
+    {
+        OnPropertyChanged(nameof(StatusChipText));
+    }
+
+    partial void OnIsCompactModeChanged(bool value)
+    {
+        OnPropertyChanged(nameof(StatusChipText));
+        OnPropertyChanged(nameof(ToggleModeMenuText));
+        OnPropertyChanged(nameof(CompactSourceVisibility));
+        OnPropertyChanged(nameof(FullFooterVisibility));
+        OnPropertyChanged(nameof(TargetWindowWidth));
+        OnPropertyChanged(nameof(TargetWindowHeight));
+        OnPropertyChanged(nameof(WidgetOuterMargin));
+        OnPropertyChanged(nameof(WidgetCornerRadius));
+        OnPropertyChanged(nameof(WidgetContentPadding));
+        OnPropertyChanged(nameof(PairLabelFontSize));
+        OnPropertyChanged(nameof(PairLabelPadding));
+        OnPropertyChanged(nameof(StatusChipPadding));
+        OnPropertyChanged(nameof(StatusFontSize));
+        OnPropertyChanged(nameof(StatusChipMinWidth));
+        OnPropertyChanged(nameof(ValueSectionMargin));
+        OnPropertyChanged(nameof(CurrentValueFontSize));
+        OnPropertyChanged(nameof(QuoteCurrencyMargin));
+        OnPropertyChanged(nameof(QuoteCurrencyFontSize));
+        OnPropertyChanged(nameof(ChangeFontSize));
+        OnPropertyChanged(nameof(ChangeGroupMargin));
+        OnPropertyChanged(nameof(ChangeRowMargin));
+        OnPropertyChanged(nameof(CompactSourceMargin));
+        OnPropertyChanged(nameof(CompactSourceFontSize));
+        OnPropertyChanged(nameof(FooterSourceMargin));
+    }
+
+    partial void OnIsWindowVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ToggleVisibilityMenuText));
     }
 }
