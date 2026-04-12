@@ -2,9 +2,15 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using FXRateDashboard.Utilities;
 using FXRateDashboard.ViewModels;
 using FXRateDashboard.Views;
 using Microsoft.Extensions.DependencyInjection;
+using DrawingRectangle = System.Drawing.Rectangle;
+using Forms = System.Windows.Forms;
+using WpfPoint = System.Windows.Point;
+using WpfRect = System.Windows.Rect;
+using WpfSize = System.Windows.Size;
 
 namespace FXRateDashboard;
 
@@ -218,10 +224,13 @@ public partial class MainWindow : Window
     {
         var targetWidth = _viewModel.TargetWindowWidth;
         var targetHeight = _viewModel.TargetWindowHeight;
+        var targetPosition = CalculateTargetPosition(targetWidth, targetHeight);
 
         if (!animated || _isApplyingModeTransition)
         {
             ApplyGridModeState(_viewModel.IsCompactMode);
+            Left = targetPosition.X;
+            Top = targetPosition.Y;
             Width = targetWidth;
             Height = targetHeight;
             MinWidth = targetWidth;
@@ -242,6 +251,12 @@ public partial class MainWindow : Window
         MaxWidth = double.PositiveInfinity;
         MinHeight = 0;
         MaxHeight = double.PositiveInfinity;
+
+        if (targetWidth > Width || targetHeight > Height)
+        {
+            Left = targetPosition.X;
+            Top = targetPosition.Y;
+        }
 
         if (_viewModel.IsCompactMode)
         {
@@ -272,6 +287,8 @@ public partial class MainWindow : Window
             FooterPanel.Visibility = _viewModel.IsCompactMode ? Visibility.Collapsed : Visibility.Visible;
             CompactSourceText.Visibility = _viewModel.IsCompactMode ? Visibility.Visible : Visibility.Collapsed;
             CompactSourceText.Opacity = _viewModel.IsCompactMode ? 1 : 0;
+            Left = targetPosition.X;
+            Top = targetPosition.Y;
             Width = targetWidth;
             Height = targetHeight;
             MinWidth = targetWidth;
@@ -283,6 +300,24 @@ public partial class MainWindow : Window
 
         BeginAnimation(WidthProperty, widthAnimation, HandoffBehavior.SnapshotAndReplace);
         BeginAnimation(HeightProperty, heightAnimation, HandoffBehavior.SnapshotAndReplace);
+    }
+
+    private WpfPoint CalculateTargetPosition(double targetWidth, double targetHeight)
+    {
+        var monitor = Forms.Screen.FromRectangle(new DrawingRectangle(
+            (int)Math.Round(Left),
+            (int)Math.Round(Top),
+            Math.Max(1, (int)Math.Round(ActualWidth > 0 ? ActualWidth : Width)),
+            Math.Max(1, (int)Math.Round(ActualHeight > 0 ? ActualHeight : Height))));
+
+        var workArea = monitor.WorkingArea;
+        var workAreaRect = new WpfRect(workArea.Left, workArea.Top, workArea.Width, workArea.Height);
+        var currentBounds = new WpfRect(Left, Top, Width, Height);
+
+        return WindowPlacementHelper.CalculateClampedTopLeft(
+            workAreaRect,
+            currentBounds,
+            new WpfSize(targetWidth, targetHeight));
     }
 
     private void ApplyGridModeState(bool isCompactMode)
@@ -304,7 +339,6 @@ public partial class MainWindow : Window
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
         };
     }
-
     private static void AnimateOpacity(UIElement element, double targetOpacity, int durationMs)
     {
         var animation = new DoubleAnimation
