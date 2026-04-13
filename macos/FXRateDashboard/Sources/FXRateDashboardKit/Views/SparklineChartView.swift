@@ -5,10 +5,10 @@ public struct SparklineChartView: View {
     private let strokeColor: Color
 
     private let plotLeftMargin: CGFloat = 46
-    private let plotTopMargin: CGFloat = 10
-    private let plotRightMargin: CGFloat = 10
-    private let plotBottomMargin: CGFloat = 48
-    private let plotInnerPadding: CGFloat = 8
+    private let plotTopMargin: CGFloat = 14
+    private let plotRightMargin: CGFloat = 4
+    private let plotBottomMargin: CGFloat = 10
+    private let plotInnerPadding: CGFloat = 6
     private let axisLabelSafeInset: CGFloat = 6
     private let edgeTickLift: CGFloat = 8
 
@@ -85,7 +85,7 @@ public struct SparklineChartView: View {
                 }
             }
         }
-        .frame(minHeight: 228, idealHeight: 236, maxHeight: 236)
+        .frame(minHeight: 220, idealHeight: 228, maxHeight: 228)
     }
 
     private func drawEmptyState(in context: GraphicsContext, plotRect: CGRect, canvasSize: CGSize) {
@@ -129,7 +129,7 @@ public struct SparklineChartView: View {
                 .foregroundStyle(ColorPalette.mutedTextOnline)
 
             let labelY = min(max(y, axisLabelSafeInset), canvasSize.height - axisLabelSafeInset)
-            context.draw(label, at: CGPoint(x: plotRect.minX - 24, y: labelY), anchor: .trailing)
+            context.draw(label, at: CGPoint(x: plotRect.minX - 2, y: labelY), anchor: .trailing)
         }
 
         let distinctIndices = orderedTimeTickIndices()
@@ -141,18 +141,6 @@ public struct SparklineChartView: View {
             path.move(to: CGPoint(x: x, y: plotRect.minY))
             path.addLine(to: CGPoint(x: x, y: plotRect.maxY))
             context.stroke(path, with: .color(ColorPalette.brandForestGreen.opacity(0.09)), lineWidth: 1)
-
-            let label = Text(
-                RateMath.chartTimestampLabel(
-                    for: points[index].timestampUTC,
-                    minDate: points.first?.timestampUTC ?? .now,
-                    maxDate: points.last?.timestampUTC ?? .now
-                )
-            )
-            .font(.system(size: 9, weight: .medium, design: .rounded))
-            .foregroundStyle(ColorPalette.mutedTextOnline)
-
-            context.draw(label, at: CGPoint(x: x, y: plotRect.maxY + 16), anchor: ratio <= 0.08 ? .leading : ratio >= 0.92 ? .trailing : .center)
         }
     }
 

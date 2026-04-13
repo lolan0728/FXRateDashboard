@@ -11,13 +11,13 @@ public struct FullWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             WidgetTopBarView(viewModel: viewModel)
             WidgetValueSectionView(viewModel: viewModel)
-                .padding(.top, 10)
+                .padding(.top, 8)
 
             SparklineChartView(points: viewModel.chartPoints, strokeColor: viewModel.trendColor)
                 .padding(.top, viewModel.metrics.chartTopMargin)
                 .padding(.bottom, viewModel.metrics.chartBottomMargin)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
                 .background(
                     RoundedRectangle(cornerRadius: 26, style: .continuous)
                         .fill(viewModel.chartCardBackgroundColor)
@@ -26,11 +26,11 @@ public struct FullWidgetView: View {
                                 .stroke(ColorPalette.panelEdge, lineWidth: 1)
                         )
                 )
-                .padding(.top, 10)
-                .padding(.bottom, 14)
+                .padding(.top, 6)
+                .padding(.bottom, 6)
 
             WidgetFooterView(viewModel: viewModel)
-                .padding(.bottom, 2)
+                .padding(.bottom, 0)
         }
     }
 }

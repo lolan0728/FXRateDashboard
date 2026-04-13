@@ -18,9 +18,9 @@ public struct WidgetMetrics: Sendable {
     public let chartBottomMargin: CGFloat
 
     public static let full = WidgetMetrics(
-        size: CGSize(width: 404, height: 452),
+        size: CGSize(width: 404, height: 426),
         outerMargin: 12,
-        contentPadding: .init(top: 20, leading: 20, bottom: 18, trailing: 20),
+        contentPadding: .init(top: 10, leading: 20, bottom: 8, trailing: 20),
         cornerRadius: 32,
         pairLabelFontSize: 12,
         pairLabelPadding: .init(top: 5, leading: 10, bottom: 5, trailing: 10),
@@ -31,8 +31,8 @@ public struct WidgetMetrics: Sendable {
         quoteCurrencyFontSize: 13,
         changeFontSize: 15,
         quoteCurrencyTopPadding: 16,
-        chartTopMargin: 10,
-        chartBottomMargin: 8
+        chartTopMargin: 6,
+        chartBottomMargin: 4
     )
 
     public static let compact = WidgetMetrics(
