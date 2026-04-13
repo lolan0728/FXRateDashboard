@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var shutdownHandler: (() -> Void)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        NSApp.setActivationPolicy(.regular)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
