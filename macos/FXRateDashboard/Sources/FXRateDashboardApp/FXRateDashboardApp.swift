@@ -28,13 +28,17 @@ struct FXRateDashboardApp: App {
         WindowGroup(id: "main-widget") {
             MainWidgetSceneView(bootstrap: bootstrap) {
                 appDelegate.shutdownHandler = {
-                    Task { await bootstrap.mainWidgetViewModel.shutdown() }
+                    bootstrap.widgetWindowPlacementService.persistCurrentWindowPosition()
+                    bootstrap.mainWidgetViewModel.shutdown()
                 }
             } openSettings: {
                 settingsWindowController.show(bootstrap: bootstrap)
             }
         }
-        .defaultSize(width: WidgetMetrics.full.size.width, height: WidgetMetrics.full.size.height)
+        .defaultSize(
+            width: bootstrap.mainWidgetViewModel.metrics.size.width,
+            height: bootstrap.mainWidgetViewModel.metrics.size.height
+        )
         .windowResizability(.contentSize)
 
         MenuBarExtra("FX Rate Dashboard", systemImage: "chart.line.uptrend.xyaxis") {

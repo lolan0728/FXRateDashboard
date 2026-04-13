@@ -8,8 +8,14 @@ public final class WidgetWindowPlacementService {
     private weak var viewModel: MainWidgetViewModel?
     private var cancellables = Set<AnyCancellable>()
     private var observers: [NSObjectProtocol] = []
+    private var lastAppliedCompactMode: Bool?
+    private var hasFinishedInitialPlacement = false
 
     public init() {}
+
+    public func persistCurrentWindowPosition() {
+        persistCurrentOrigin()
+    }
 
     public func bind(window: NSWindow, to viewModel: MainWidgetViewModel) {
         guard self.window !== window else {
@@ -20,10 +26,12 @@ public final class WidgetWindowPlacementService {
 
         self.window = window
         self.viewModel = viewModel
+        self.lastAppliedCompactMode = viewModel.isCompactMode
+        self.hasFinishedInitialPlacement = false
 
         configure(window: window, viewModel: viewModel)
-        bindViewModel(viewModel)
         restoreWindowFrameIfNeeded()
+        bindViewModel(viewModel)
     }
 
     private func configure(window: NSWindow, viewModel: MainWidgetViewModel) {
@@ -39,6 +47,7 @@ public final class WidgetWindowPlacementService {
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.closeButton)?.isHidden = true
         window.collectionBehavior = [.moveToActiveSpace]
+        window.alphaValue = 0
         applyWindowMask(metrics: viewModel.metrics)
         applyMetrics(viewModel.metrics, animated: false)
 
@@ -63,7 +72,26 @@ public final class WidgetWindowPlacementService {
         viewModel.$isCompactMode
             .sink { [weak self] isCompactMode in
                 Task { @MainActor [weak self] in
-                    self?.applyMetrics(isCompactMode ? .compact : .full, animated: true)
+                    guard let self, let window else {
+                        return
+                    }
+
+                    let previousMode = self.lastAppliedCompactMode ?? !isCompactMode
+                    self.persistCurrentOrigin(forCompactMode: previousMode)
+                    self.lastAppliedCompactMode = isCompactMode
+
+                    let currentContentRect = window.contentRect(forFrameRect: window.frame)
+                    let targetMetrics = isCompactMode ? WidgetMetrics.compact : WidgetMetrics.full
+                    let anchoredOrigin = CGPoint(
+                        x: currentContentRect.origin.x,
+                        y: currentContentRect.maxY - targetMetrics.size.height
+                    )
+
+                    self.applyMetrics(
+                        targetMetrics,
+                        animated: true,
+                        preferredOrigin: anchoredOrigin
+                    )
                 }
             }
             .store(in: &cancellables)
@@ -86,17 +114,18 @@ public final class WidgetWindowPlacementService {
             return
         }
 
-        let size = viewModel.metrics.size
-        if let x = viewModel.settings.windowOriginX, let y = viewModel.settings.windowOriginY {
-            let contentRect = CGRect(origin: CGPoint(x: x, y: y), size: size)
-            window.setFrame(window.frameRect(forContentRect: contentRect), display: true)
+        if let origin = viewModel.storedWindowOrigin(forCompactMode: viewModel.isCompactMode) {
+            applyMetrics(viewModel.metrics, animated: false, preferredOrigin: origin)
         } else {
             window.center()
             applyMetrics(viewModel.metrics, animated: false)
         }
+
+        hasFinishedInitialPlacement = true
+        window.alphaValue = 1
     }
 
-    private func applyMetrics(_ metrics: WidgetMetrics, animated: Bool) {
+    private func applyMetrics(_ metrics: WidgetMetrics, animated: Bool, preferredOrigin: CGPoint? = nil) {
         guard let window else {
             return
         }
@@ -107,7 +136,8 @@ public final class WidgetWindowPlacementService {
             for: metrics.size,
             currentFrame: window.frame,
             workArea: window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? window.frame,
-            window: window
+            window: window,
+            preferredOrigin: preferredOrigin
         )
         window.minSize = metrics.size
         window.maxSize = metrics.size
@@ -122,18 +152,33 @@ public final class WidgetWindowPlacementService {
                 window.animator().setFrame(targetRect, display: true)
             }
         } else {
-            window.setFrame(targetRect, display: true)
+            window.setFrame(targetRect, display: false)
         }
 
         window.invalidateShadow()
     }
 
-    private func targetFrame(for size: CGSize, currentFrame: CGRect, workArea: CGRect, window: NSWindow) -> CGRect {
-        let origin = WindowPlacementHelper.calculateClampedTopLeft(
-            workArea: workArea,
-            currentBounds: currentFrame,
-            targetSize: size
-        )
+    private func targetFrame(
+        for size: CGSize,
+        currentFrame: CGRect,
+        workArea: CGRect,
+        window: NSWindow,
+        preferredOrigin: CGPoint?
+    ) -> CGRect {
+        let origin: CGPoint
+
+        if let preferredOrigin {
+            origin = CGPoint(
+                x: min(max(preferredOrigin.x, workArea.minX), workArea.maxX - size.width),
+                y: min(max(preferredOrigin.y, workArea.minY), workArea.maxY - size.height)
+            )
+        } else {
+            origin = WindowPlacementHelper.calculateClampedTopLeft(
+                workArea: workArea,
+                currentBounds: currentFrame,
+                targetSize: size
+            )
+        }
 
         let contentRect = CGRect(origin: origin, size: size)
         return window.frameRect(forContentRect: contentRect)
@@ -141,6 +186,10 @@ public final class WidgetWindowPlacementService {
 
     private func setWindowVisible(_ isVisible: Bool) {
         guard let window else {
+            return
+        }
+
+        guard hasFinishedInitialPlacement else {
             return
         }
 
@@ -152,12 +201,17 @@ public final class WidgetWindowPlacementService {
         }
     }
 
-    private func persistCurrentOrigin() {
+    private func persistCurrentOrigin(forCompactMode: Bool? = nil) {
         guard let window, let viewModel else {
             return
         }
 
-        viewModel.updateWindowPosition(x: window.frame.origin.x, y: window.frame.origin.y)
+        let contentOrigin = window.contentRect(forFrameRect: window.frame).origin
+        viewModel.updateWindowPosition(
+            x: contentOrigin.x,
+            y: contentOrigin.y,
+            forCompactMode: forCompactMode
+        )
     }
 
     private func cleanup() {

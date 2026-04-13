@@ -16,6 +16,8 @@ public final class AppBootstrap: ObservableObject {
         let wiseRateClient = WiseRateClient()
         let rateQueryMapper = RateQueryMapper()
         let launchAtLoginService = LaunchAtLoginService()
+        var initialSettings = settingsStore.loadSynchronously()
+        initialSettings.hasStoredToken = tokenStore.hasToken()
 
         let mainWidgetViewModel = MainWidgetViewModel(
             settingsStore: settingsStore,
@@ -23,7 +25,8 @@ public final class AppBootstrap: ObservableObject {
             wiseRateClient: wiseRateClient,
             rateQueryMapper: rateQueryMapper,
             tokenStore: tokenStore,
-            launchAtLoginService: launchAtLoginService
+            launchAtLoginService: launchAtLoginService,
+            initialSettings: initialSettings
         )
 
         self.mainWidgetViewModel = mainWidgetViewModel

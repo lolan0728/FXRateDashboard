@@ -1,4 +1,5 @@
 import Combine
+import CoreGraphics
 import Foundation
 import SwiftUI
 
@@ -71,7 +72,8 @@ public final class MainWidgetViewModel: ObservableObject {
         wiseRateClient: WiseRateClientProtocol,
         rateQueryMapper: RateQueryMapperProtocol,
         tokenStore: TokenStoreProtocol,
-        launchAtLoginService: LaunchAtLoginServiceProtocol
+        launchAtLoginService: LaunchAtLoginServiceProtocol,
+        initialSettings: AppSettings = AppSettings()
     ) {
         self.settingsStore = settingsStore
         self.cacheStore = cacheStore
@@ -79,6 +81,9 @@ public final class MainWidgetViewModel: ObservableObject {
         self.rateQueryMapper = rateQueryMapper
         self.tokenStore = tokenStore
         self.launchAtLoginService = launchAtLoginService
+        self.currentSettings = initialSettings.normalized()
+        self.currentSettings.hasStoredToken = tokenStore.hasToken()
+        applySettingsToPublishedState()
     }
 
     public func initialize() async {
@@ -123,13 +128,13 @@ public final class MainWidgetViewModel: ObservableObject {
         applySettingsToPublishedState()
     }
 
-    public func updateWindowPosition(x: Double, y: Double) {
+    public func updateWindowPosition(x: Double, y: Double, forCompactMode: Bool? = nil) {
         guard !currentSettings.lockPosition else {
             return
         }
 
-        currentSettings.windowOriginX = x
-        currentSettings.windowOriginY = y
+        let targetMode = forCompactMode ?? currentSettings.isCompactMode
+        setStoredWindowOrigin(x: x, y: y, forCompactMode: targetMode)
 
         Task {
             try? await settingsStore.save(currentSettings)
@@ -148,6 +153,25 @@ public final class MainWidgetViewModel: ObservableObject {
         currentSettings.isCompactMode.toggle()
         isCompactMode = currentSettings.isCompactMode
         try? await settingsStore.save(currentSettings)
+    }
+
+    public func storedWindowOrigin(forCompactMode: Bool) -> CGPoint? {
+        let x: Double?
+        let y: Double?
+
+        if forCompactMode {
+            x = currentSettings.compactWindowOriginX ?? (currentSettings.isCompactMode ? currentSettings.windowOriginX : nil)
+            y = currentSettings.compactWindowOriginY ?? (currentSettings.isCompactMode ? currentSettings.windowOriginY : nil)
+        } else {
+            x = currentSettings.fullWindowOriginX ?? (!currentSettings.isCompactMode ? currentSettings.windowOriginX : nil)
+            y = currentSettings.fullWindowOriginY ?? (!currentSettings.isCompactMode ? currentSettings.windowOriginY : nil)
+        }
+
+        guard let x, let y else {
+            return nil
+        }
+
+        return CGPoint(x: x, y: y)
     }
 
     public func selectRange(_ range: TimeRangePreset) async {
@@ -242,9 +266,9 @@ public final class MainWidgetViewModel: ObservableObject {
         return nil
     }
 
-    public func shutdown() async {
+    public func shutdown() {
         stopPolling()
-        try? await settingsStore.save(currentSettings)
+        try? settingsStore.saveSynchronously(currentSettings)
     }
 
     private func applySettingsToPublishedState() {
@@ -257,6 +281,19 @@ public final class MainWidgetViewModel: ObservableObject {
         activeRange = currentSettings.activeRange
         isCompactMode = currentSettings.isCompactMode
         isPositionLocked = currentSettings.lockPosition
+    }
+
+    private func setStoredWindowOrigin(x: Double, y: Double, forCompactMode: Bool) {
+        currentSettings.windowOriginX = x
+        currentSettings.windowOriginY = y
+
+        if forCompactMode {
+            currentSettings.compactWindowOriginX = x
+            currentSettings.compactWindowOriginY = y
+        } else {
+            currentSettings.fullWindowOriginX = x
+            currentSettings.fullWindowOriginY = y
+        }
     }
 
     private func restoreCachedSnapshot(presentAsOffline: Bool) async {
