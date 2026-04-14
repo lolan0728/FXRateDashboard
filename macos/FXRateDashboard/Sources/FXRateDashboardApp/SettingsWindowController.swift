@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 final class SettingsWindowController: NSObject, NSWindowDelegate {
-    private static let windowSize = NSSize(width: 392, height: 492)
+    private static let windowSize = NSSize(width: 392, height: 474)
 
     private weak var bootstrap: AppBootstrap?
     private var window: NSWindow?

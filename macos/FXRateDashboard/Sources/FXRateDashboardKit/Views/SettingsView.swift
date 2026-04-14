@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct SettingsView: View {
-    private static let windowSize = CGSize(width: 392, height: 492)
+    private static let windowSize = CGSize(width: 392, height: 474)
 
     @ObservedObject private var viewModel: SettingsViewModel
     private let onSave: () async -> String?
@@ -156,7 +156,7 @@ public struct SettingsView: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 14)
-                .padding(.bottom, 22)
+                .padding(.bottom, 6)
             }
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
             .clipShape(RoundedRectangle(cornerRadius: windowCornerRadius, style: .continuous))

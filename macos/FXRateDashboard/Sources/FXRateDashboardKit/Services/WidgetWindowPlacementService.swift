@@ -145,15 +145,7 @@ public final class WidgetWindowPlacementService {
         window.contentMaxSize = metrics.size
         window.setContentSize(metrics.size)
 
-        if animated {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.28
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                window.animator().setFrame(targetRect, display: true)
-            }
-        } else {
-            window.setFrame(targetRect, display: false)
-        }
+        window.setFrame(targetRect, display: animated)
 
         window.invalidateShadow()
     }
@@ -194,10 +186,11 @@ public final class WidgetWindowPlacementService {
         }
 
         if isVisible {
+            NSApp.unhide(nil)
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
         } else {
-            window.orderOut(nil)
+            NSApp.hide(nil)
         }
     }
 

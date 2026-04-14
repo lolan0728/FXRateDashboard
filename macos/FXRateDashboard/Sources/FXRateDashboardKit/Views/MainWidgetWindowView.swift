@@ -60,26 +60,11 @@ public struct MainWidgetWindowView: View {
                 .shadow(color: ColorPalette.widgetShadow, radius: 24, x: 0, y: 10)
 
             Group {
-                ZStack {
-                    if viewModel.isCompactMode {
-                        CompactWidgetView(viewModel: viewModel)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .opacity.combined(with: .scale(scale: 0.96)),
-                                    removal: .opacity
-                                )
-                            )
-                    } else {
-                        FullWidgetView(viewModel: viewModel)
-                            .transition(
-                                .asymmetric(
-                                    insertion: .opacity.combined(with: .scale(scale: 1.01)),
-                                    removal: .opacity
-                                )
-                            )
-                    }
+                if viewModel.isCompactMode {
+                    CompactWidgetView(viewModel: viewModel)
+                } else {
+                    FullWidgetView(viewModel: viewModel)
                 }
-                .animation(.easeInOut(duration: 0.22), value: viewModel.isCompactMode)
             }
             .padding(EdgeInsets(metrics.contentPadding))
         }
@@ -93,6 +78,12 @@ public struct MainWidgetWindowView: View {
         )
         .animation(.easeInOut(duration: 0.5), value: viewModel.isOffline)
         .background(Color.clear)
+        .contentShape(widgetShape)
+        .onTapGesture(count: 2) {
+            Task {
+                await viewModel.toggleCompactMode()
+            }
+        }
         .contextMenu {
             Button(viewModel.toggleVisibilityMenuText) {
                 viewModel.setWindowVisible(!viewModel.isWindowVisible)

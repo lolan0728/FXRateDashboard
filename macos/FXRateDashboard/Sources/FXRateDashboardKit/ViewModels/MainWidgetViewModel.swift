@@ -65,6 +65,7 @@ public final class MainWidgetViewModel: ObservableObject {
     private var currentRateTask: Task<Void, Never>?
     private var historyTask: Task<Void, Never>?
     private var didInitialize = false
+    private var lastCompactToggleAt = Date.distantPast
 
     public init(
         settingsStore: SettingsStoreProtocol,
@@ -150,6 +151,12 @@ public final class MainWidgetViewModel: ObservableObject {
     }
 
     public func toggleCompactMode() async {
+        let now = Date()
+        guard now.timeIntervalSince(lastCompactToggleAt) > 0.35 else {
+            return
+        }
+
+        lastCompactToggleAt = now
         currentSettings.isCompactMode.toggle()
         isCompactMode = currentSettings.isCompactMode
         try? await settingsStore.save(currentSettings)
