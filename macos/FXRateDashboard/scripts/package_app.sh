@@ -13,7 +13,7 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 ICONSET_DIR="$BUILD_DIR/AppIcon.iconset"
 ICON_PATH="$RESOURCES_DIR/AppIcon.icns"
 EXECUTABLE_PATH="$RELEASE_DIR/FXRateDashboard"
-SOURCE_ICON="$ROOT_DIR/../../src/FXRateDashboard/Assets/FXRateDashboard.png"
+SOURCE_ICON="$ROOT_DIR/Packaging/AppIconSource.png"
 
 rm -rf "$APP_DIR" "$ICONSET_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$DIST_DIR"
