@@ -10,6 +10,7 @@ public final class WidgetWindowPlacementService {
     private var observers: [NSObjectProtocol] = []
     private var lastAppliedCompactMode: Bool?
     private var hasFinishedInitialPlacement = false
+    private var isApplyingMetrics = false
 
     public init() {}
 
@@ -55,7 +56,11 @@ public final class WidgetWindowPlacementService {
         observers.append(
             notificationCenter.addObserver(forName: NSWindow.didMoveNotification, object: window, queue: .main) { [weak self] _ in
                 Task { @MainActor [weak self] in
-                    self?.persistCurrentOrigin()
+                    guard let self else { return }
+                    guard !self.isApplyingMetrics else {
+                        return
+                    }
+                    self.persistCurrentOrigin()
                 }
             }
         )
@@ -123,6 +128,7 @@ public final class WidgetWindowPlacementService {
 
         hasFinishedInitialPlacement = true
         window.alphaValue = 1
+        setWindowVisible(viewModel.isWindowVisible)
     }
 
     private func applyMetrics(_ metrics: WidgetMetrics, animated: Bool, preferredOrigin: CGPoint? = nil) {
@@ -143,9 +149,22 @@ public final class WidgetWindowPlacementService {
         window.maxSize = metrics.size
         window.contentMinSize = metrics.size
         window.contentMaxSize = metrics.size
-        window.setContentSize(metrics.size)
 
-        window.setFrame(targetRect, display: animated)
+        if animated {
+            isApplyingMetrics = true
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.6
+                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                window.animator().setFrame(targetRect, display: true)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { [weak self] in
+                self?.isApplyingMetrics = false
+            }
+        } else {
+            isApplyingMetrics = true
+            window.setFrame(targetRect, display: true)
+            isApplyingMetrics = false
+        }
 
         window.invalidateShadow()
     }

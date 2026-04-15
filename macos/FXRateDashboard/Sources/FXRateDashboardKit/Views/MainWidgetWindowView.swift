@@ -5,6 +5,9 @@ public struct MainWidgetWindowView: View {
     private let windowPlacementService: WidgetWindowPlacementService
     private let openSettings: () -> Void
     private let quitApplication: () -> Void
+    private let modeTransition = AnyTransition
+        .opacity
+        .combined(with: .scale(scale: 0.985, anchor: .center))
 
     public init(
         viewModel: MainWidgetViewModel,
@@ -62,8 +65,10 @@ public struct MainWidgetWindowView: View {
             Group {
                 if viewModel.isCompactMode {
                     CompactWidgetView(viewModel: viewModel)
+                        .transition(modeTransition)
                 } else {
                     FullWidgetView(viewModel: viewModel)
+                        .transition(modeTransition)
                 }
             }
             .padding(EdgeInsets(metrics.contentPadding))
@@ -77,6 +82,7 @@ public struct MainWidgetWindowView: View {
             }
         )
         .animation(.easeInOut(duration: 0.5), value: viewModel.isOffline)
+        .animation(.spring(response: 0.6, dampingFraction: 0.9), value: viewModel.isCompactMode)
         .background(Color.clear)
         .contentShape(widgetShape)
         .onTapGesture(count: 2) {
