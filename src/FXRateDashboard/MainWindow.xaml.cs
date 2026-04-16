@@ -220,6 +220,17 @@ public partial class MainWindow : Window
         ShowContextMenuAtCursor();
     }
 
+    private async void Window_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount < 2)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        await ToggleModeFromMenuAsync();
+    }
+
     private void ApplyModeState(bool animated)
     {
         var targetWidth = _viewModel.TargetWindowWidth;

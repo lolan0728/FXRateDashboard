@@ -21,6 +21,7 @@
         Opacity="1"
         ShowInTaskbar="False"
         SnapsToDevicePixels="True"
+        PreviewMouseLeftButtonDown="Window_OnPreviewMouseLeftButtonDown"
         PreviewMouseRightButtonUp="Window_OnPreviewMouseRightButtonUp">
     <Window.Resources>
         <Style x:Key="RangeButtonStyle" TargetType="Button" BasedOn="{StaticResource WidgetTextButtonStyle}">
