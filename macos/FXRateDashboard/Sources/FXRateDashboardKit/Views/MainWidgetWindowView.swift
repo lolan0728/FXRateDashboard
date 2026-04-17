@@ -62,15 +62,22 @@ public struct MainWidgetWindowView: View {
                 )
                 .shadow(color: ColorPalette.widgetShadow, radius: 24, x: 0, y: 10)
 
-            Group {
+            ZStack(alignment: .topLeading) {
+                // Keep both branches in an explicit stack during transitions so the
+                // outgoing full view is not intermittently covered by the compact view.
+                if !viewModel.isCompactMode {
+                    FullWidgetView(viewModel: viewModel)
+                        .transition(modeTransition)
+                        .zIndex(1)
+                }
+
                 if viewModel.isCompactMode {
                     CompactWidgetView(viewModel: viewModel)
                         .transition(modeTransition)
-                } else {
-                    FullWidgetView(viewModel: viewModel)
-                        .transition(modeTransition)
+                        .zIndex(0)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(EdgeInsets(metrics.contentPadding))
         }
         .clipShape(widgetShape)

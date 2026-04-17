@@ -183,7 +183,6 @@ struct FXRateDashboardApp: App {
             width: bootstrap.mainWidgetViewModel.metrics.size.width,
             height: bootstrap.mainWidgetViewModel.metrics.size.height
         )
-        .windowResizability(.contentSize)
 
         MenuBarExtra("FX Rate Dashboard", systemImage: "chart.line.uptrend.xyaxis") {
             MenuBarSceneView(bootstrap: bootstrap) {

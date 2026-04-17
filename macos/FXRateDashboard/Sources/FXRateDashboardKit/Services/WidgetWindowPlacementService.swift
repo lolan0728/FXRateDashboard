@@ -160,23 +160,36 @@ public final class WidgetWindowPlacementService {
             window: window,
             preferredOrigin: preferredOrigin
         )
-        window.minSize = metrics.size
-        window.maxSize = metrics.size
-        window.contentMinSize = metrics.size
-        window.contentMaxSize = metrics.size
+        let currentContentSize = window.contentRect(forFrameRect: window.frame).size
 
         if animated {
             isApplyingMetrics = true
+            applyWindowSizeBounds(
+                minimum: CGSize(
+                    width: min(currentContentSize.width, metrics.size.width),
+                    height: min(currentContentSize.height, metrics.size.height)
+                ),
+                maximum: CGSize(
+                    width: max(currentContentSize.width, metrics.size.width),
+                    height: max(currentContentSize.height, metrics.size.height)
+                )
+            )
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.6
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                context.completionHandler = { [weak self] in
+                    guard let self else {
+                        return
+                    }
+
+                    self.lockWindowSize(to: metrics.size)
+                    self.isApplyingMetrics = false
+                }
                 window.animator().setFrame(targetRect, display: true)
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { [weak self] in
-                self?.isApplyingMetrics = false
             }
         } else {
             isApplyingMetrics = true
+            lockWindowSize(to: metrics.size)
             window.setFrame(targetRect, display: true)
             isApplyingMetrics = false
         }
@@ -262,6 +275,21 @@ public final class WidgetWindowPlacementService {
 
         window.collectionBehavior = behavior
         window.ignoresMouseEvents = isClickThroughEnabled
+    }
+
+    private func lockWindowSize(to size: CGSize) {
+        applyWindowSizeBounds(minimum: size, maximum: size)
+    }
+
+    private func applyWindowSizeBounds(minimum: CGSize, maximum: CGSize) {
+        guard let window else {
+            return
+        }
+
+        window.minSize = minimum
+        window.contentMinSize = minimum
+        window.maxSize = maximum
+        window.contentMaxSize = maximum
     }
 
     private func applyWindowMask(metrics: WidgetMetrics) {
