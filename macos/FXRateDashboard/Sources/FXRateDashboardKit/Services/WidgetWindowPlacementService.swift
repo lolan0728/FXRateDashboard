@@ -49,8 +49,7 @@ public final class WidgetWindowPlacementService {
         window.standardWindowButton(.zoomButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.closeButton)?.isHidden = true
-        window.collectionBehavior = [.moveToActiveSpace]
-        window.ignoresMouseEvents = viewModel.isClickThroughEnabled
+        applyDesktopPinnedBehavior(for: window, isClickThroughEnabled: viewModel.isClickThroughEnabled)
         window.alphaValue = 0
         applyWindowMask(metrics: viewModel.metrics)
         applyMetrics(viewModel.metrics, animated: false)
@@ -122,7 +121,7 @@ public final class WidgetWindowPlacementService {
                     return
                 }
 
-                window.ignoresMouseEvents = isEnabled
+                self.applyDesktopPinnedBehavior(for: window, isClickThroughEnabled: isEnabled)
                 if self.hasFinishedInitialPlacement {
                     window.alphaValue = self.targetWindowAlpha(isClickThroughEnabled: isEnabled)
                 }
@@ -251,6 +250,18 @@ public final class WidgetWindowPlacementService {
 
     private func targetWindowAlpha(isClickThroughEnabled: Bool) -> CGFloat {
         isClickThroughEnabled ? clickThroughWindowAlpha : normalWindowAlpha
+    }
+
+    private func applyDesktopPinnedBehavior(for window: NSWindow, isClickThroughEnabled: Bool) {
+        var behavior: NSWindow.CollectionBehavior = [.moveToActiveSpace]
+        if isClickThroughEnabled {
+            // Apple documents `.stationary` as staying visible and stationary
+            // like the desktop window, which best matches the widget-like mode.
+            behavior.insert(.stationary)
+        }
+
+        window.collectionBehavior = behavior
+        window.ignoresMouseEvents = isClickThroughEnabled
     }
 
     private func applyWindowMask(metrics: WidgetMetrics) {

@@ -1,5 +1,7 @@
 .vs/
 .dotnet_cli_home/
+.codex/
+.DS_Store
 
 bin/
 obj/
