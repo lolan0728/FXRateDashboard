@@ -1,6 +1,8 @@
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using FXRateDashboard.Utilities;
 using FXRateDashboard.ViewModels;
@@ -16,6 +18,15 @@ namespace FXRateDashboard;
 
 public partial class MainWindow : Window
 {
+    private const int GwlExStyle = -20;
+    private const int WsExLayered = 0x00080000;
+    private const int WsExTransparent = 0x00000020;
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoZOrder = 0x0004;
+    private const uint SwpNoActivate = 0x0010;
+    private const uint SwpFrameChanged = 0x0020;
+
     private readonly MainViewModel _viewModel;
     private readonly IServiceProvider _serviceProvider;
     private bool _isInitialized;
@@ -30,6 +41,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
 
         Loaded += MainWindow_OnLoaded;
+        SourceInitialized += MainWindow_OnSourceInitialized;
         Closing += MainWindow_OnClosing;
         LocationChanged += MainWindow_OnLocationChanged;
         IsVisibleChanged += MainWindow_OnIsVisibleChanged;
@@ -69,6 +81,11 @@ public partial class MainWindow : Window
     public async Task ToggleModeFromMenuAsync()
     {
         await _viewModel.ToggleCompactModeAsync();
+    }
+
+    public async Task ToggleClickThroughFromMenuAsync()
+    {
+        await _viewModel.ToggleClickThroughAsync();
     }
 
     public void HideToTray()
@@ -114,6 +131,11 @@ public partial class MainWindow : Window
         await _viewModel.InitializeAsync();
     }
 
+    private void MainWindow_OnSourceInitialized(object? sender, EventArgs e)
+    {
+        ApplyClickThroughState();
+    }
+
     private void MainWindow_OnLocationChanged(object? sender, EventArgs e)
     {
         if (!IsLoaded)
@@ -146,6 +168,12 @@ public partial class MainWindow : Window
         if (e.PropertyName == nameof(MainViewModel.IsCompactMode))
         {
             await Dispatcher.InvokeAsync(() => ApplyModeState(animated: IsLoaded && IsVisible));
+            return;
+        }
+
+        if (e.PropertyName == nameof(MainViewModel.IsClickThroughEnabled))
+        {
+            await Dispatcher.InvokeAsync(ApplyClickThroughState);
         }
     }
 
@@ -206,7 +234,9 @@ public partial class MainWindow : Window
 
     private void DragSurface_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed || _viewModel.IsPositionLocked)
+        if (_viewModel.IsClickThroughEnabled ||
+            e.LeftButton != MouseButtonState.Pressed ||
+            _viewModel.IsPositionLocked)
         {
             return;
         }
@@ -216,12 +246,22 @@ public partial class MainWindow : Window
 
     private void Window_OnPreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (_viewModel.IsClickThroughEnabled)
+        {
+            return;
+        }
+
         e.Handled = true;
         ShowContextMenuAtCursor();
     }
 
     private async void Window_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (_viewModel.IsClickThroughEnabled)
+        {
+            return;
+        }
+
         if (e.ClickCount < 2)
         {
             return;
@@ -366,4 +406,69 @@ public partial class MainWindow : Window
 
         element.BeginAnimation(OpacityProperty, animation, HandoffBehavior.SnapshotAndReplace);
     }
+
+    private void ApplyClickThroughState()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var exStyle = GetWindowExStyle(hwnd);
+        exStyle |= WsExLayered;
+
+        if (_viewModel.IsClickThroughEnabled)
+        {
+            exStyle |= WsExTransparent;
+        }
+        else
+        {
+            exStyle &= ~WsExTransparent;
+        }
+
+        SetWindowExStyle(hwnd, exStyle);
+        SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SwpNoMove | SwpNoSize | SwpNoZOrder | SwpNoActivate | SwpFrameChanged);
+    }
+
+    private static int GetWindowExStyle(IntPtr hwnd)
+    {
+        return IntPtr.Size == 8
+            ? unchecked((int)GetWindowLongPtr(hwnd, GwlExStyle).ToInt64())
+            : GetWindowLong(hwnd, GwlExStyle);
+    }
+
+    private static void SetWindowExStyle(IntPtr hwnd, int style)
+    {
+        if (IntPtr.Size == 8)
+        {
+            SetWindowLongPtr(hwnd, GwlExStyle, new IntPtr(style));
+        }
+        else
+        {
+            SetWindowLong(hwnd, GwlExStyle, style);
+        }
+    }
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
+    private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(
+        IntPtr hWnd,
+        IntPtr hWndInsertAfter,
+        int x,
+        int y,
+        int cx,
+        int cy,
+        uint uFlags);
 }

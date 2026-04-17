@@ -146,9 +146,14 @@ public partial class MainViewModel : ObservableObject
     private bool _isCompactMode;
 
     [ObservableProperty]
+    private bool _isClickThroughEnabled;
+
+    [ObservableProperty]
     private bool _isWindowVisible = true;
 
     public string ToggleModeMenuText => IsCompactMode ? "Restore Full Mode" : "Compact Mode";
+
+    public string ToggleClickThroughMenuText => IsClickThroughEnabled ? "Disable Click-through" : "Enable Click-through";
 
     public string ToggleVisibilityMenuText => IsWindowVisible ? "Hide Window" : "Show Window";
 
@@ -346,9 +351,10 @@ public partial class MainViewModel : ObservableObject
             QuoteCurrencyCode = _settings.QuoteCurrency;
             ActiveRange = _settings.ActiveRange;
             IsCompactMode = _settings.IsCompactMode;
+            IsClickThroughEnabled = _settings.IsClickThroughEnabled;
             AlwaysOnTop = false;
             IsPositionLocked = _settings.LockPosition;
-            PanelOpacity = 1.0;
+            PanelOpacity = IsClickThroughEnabled ? 0.75 : 1.0;
         });
     }
 
@@ -627,6 +633,13 @@ public partial class MainViewModel : ObservableObject
         await _uiDispatcher.InvokeAsync(() => IsCompactMode = _settings.IsCompactMode);
     }
 
+    public async Task ToggleClickThroughAsync()
+    {
+        _settings.IsClickThroughEnabled = !_settings.IsClickThroughEnabled;
+        await _settingsStore.SaveAsync(_settings);
+        await _uiDispatcher.InvokeAsync(() => IsClickThroughEnabled = _settings.IsClickThroughEnabled);
+    }
+
     public void SetWindowVisible(bool isVisible)
     {
         if (IsWindowVisible == isVisible)
@@ -781,6 +794,12 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(CompactSourceMargin));
         OnPropertyChanged(nameof(CompactSourceFontSize));
         OnPropertyChanged(nameof(FooterSourceMargin));
+    }
+
+    partial void OnIsClickThroughEnabledChanged(bool value)
+    {
+        PanelOpacity = value ? 0.75 : 1.0;
+        OnPropertyChanged(nameof(ToggleClickThroughMenuText));
     }
 
     partial void OnIsWindowVisibleChanged(bool value)

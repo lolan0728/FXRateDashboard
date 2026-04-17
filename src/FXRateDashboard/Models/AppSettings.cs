@@ -14,6 +14,8 @@ public sealed class AppSettings
 
     public bool IsCompactMode { get; set; }
 
+    public bool IsClickThroughEnabled { get; set; }
+
     public double? WindowLeft { get; set; }
 
     public double? WindowTop { get; set; }
@@ -40,6 +42,7 @@ public sealed class AppSettings
             ActiveRange = ActiveRange,
             RefreshSeconds = RefreshSeconds,
             IsCompactMode = IsCompactMode,
+            IsClickThroughEnabled = IsClickThroughEnabled,
             WindowLeft = WindowLeft,
             WindowTop = WindowTop,
             AlwaysOnTop = AlwaysOnTop,
@@ -57,6 +60,7 @@ public sealed class AppSettings
         BaseAmount = BaseAmount <= 0 ? 1m : decimal.Round(BaseAmount, 4);
         RefreshSeconds = Math.Clamp(RefreshSeconds, 15, 3600);
         IsCompactMode = IsCompactMode;
+        IsClickThroughEnabled = IsClickThroughEnabled;
         AlwaysOnTop = false;
         Opacity = 1.0;
         EncryptedWiseToken = string.IsNullOrWhiteSpace(EncryptedWiseToken) ? null : EncryptedWiseToken.Trim();

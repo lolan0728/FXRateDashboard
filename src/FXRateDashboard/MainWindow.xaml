@@ -18,7 +18,7 @@
         Background="Transparent"
         AllowsTransparency="True"
         Topmost="False"
-        Opacity="1"
+        Opacity="{Binding PanelOpacity}"
         ShowInTaskbar="False"
         SnapsToDevicePixels="True"
         PreviewMouseLeftButtonDown="Window_OnPreviewMouseLeftButtonDown"

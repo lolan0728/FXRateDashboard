@@ -8,6 +8,7 @@ public partial class TrayMenuWindow : Window
 {
     public event EventHandler? ToggleVisibilityRequested;
     public event EventHandler? ToggleModeRequested;
+    public event EventHandler? ToggleClickThroughRequested;
     public event EventHandler? SettingsRequested;
     public event EventHandler? QuitRequested;
 
@@ -65,6 +66,12 @@ public partial class TrayMenuWindow : Window
     {
         Hide();
         SettingsRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ToggleClickThroughButton_Click(object sender, RoutedEventArgs e)
+    {
+        Hide();
+        ToggleClickThroughRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void QuitButton_Click(object sender, RoutedEventArgs e)

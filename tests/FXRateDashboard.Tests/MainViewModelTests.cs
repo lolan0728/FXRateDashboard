@@ -149,4 +149,31 @@ public sealed class MainViewModelTests
         Assert.Equal(122d, viewModel.TargetWindowHeight);
         Assert.True(settingsStore.CurrentSettings.IsCompactMode);
     }
+
+    [Fact]
+    public async Task ToggleClickThroughAsync_PersistsAndUpdatesMenuText()
+    {
+        var settingsStore = new InMemorySettingsStore
+        {
+            CurrentSettings = new AppSettings
+            {
+                IsClickThroughEnabled = false
+            }
+        };
+        var viewModel = new MainViewModel(
+            settingsStore,
+            new InMemoryCacheStore(),
+            new StubWiseRateClient(),
+            new RateQueryMapper(),
+            new TokenProtector(),
+            new ImmediateUiDispatcher(),
+            new StubStartupLaunchService());
+
+        await viewModel.EnsureSettingsLoadedAsync();
+        await viewModel.ToggleClickThroughAsync();
+
+        Assert.True(viewModel.IsClickThroughEnabled);
+        Assert.Equal("Disable Click-through", viewModel.ToggleClickThroughMenuText);
+        Assert.True(settingsStore.CurrentSettings.IsClickThroughEnabled);
+    }
 }

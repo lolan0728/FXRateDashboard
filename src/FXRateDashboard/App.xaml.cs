@@ -104,6 +104,7 @@ public partial class App : WpfApplication
         _trayMenuWindow = _host!.Services.GetRequiredService<TrayMenuWindow>();
         _trayMenuWindow.ToggleVisibilityRequested += (_, _) => Dispatcher.Invoke(mainWindow.ToggleVisibilityFromMenu);
         _trayMenuWindow.ToggleModeRequested += async (_, _) => await Dispatcher.InvokeAsync(mainWindow.ToggleModeFromMenuAsync);
+        _trayMenuWindow.ToggleClickThroughRequested += async (_, _) => await Dispatcher.InvokeAsync(mainWindow.ToggleClickThroughFromMenuAsync);
         _trayMenuWindow.SettingsRequested += (_, _) => Dispatcher.Invoke(mainWindow.OpenSettingsFromTray);
         _trayMenuWindow.QuitRequested += (_, _) => Dispatcher.Invoke(mainWindow.Close);
 
