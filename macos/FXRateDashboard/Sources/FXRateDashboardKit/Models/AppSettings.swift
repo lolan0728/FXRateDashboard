@@ -14,6 +14,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var compactWindowOriginX: Double?
     public var compactWindowOriginY: Double?
     public var lockPosition: Bool
+    public var clickThroughEnabled: Bool
     public var launchAtStartup: Bool
     public var hasStoredToken: Bool
 
@@ -31,6 +32,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         compactWindowOriginX: Double? = nil,
         compactWindowOriginY: Double? = nil,
         lockPosition: Bool = false,
+        clickThroughEnabled: Bool = false,
         launchAtStartup: Bool = false,
         hasStoredToken: Bool = false
     ) {
@@ -47,6 +49,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         self.compactWindowOriginX = compactWindowOriginX
         self.compactWindowOriginY = compactWindowOriginY
         self.lockPosition = lockPosition
+        self.clickThroughEnabled = clickThroughEnabled
         self.launchAtStartup = launchAtStartup
         self.hasStoredToken = hasStoredToken
     }
@@ -86,5 +89,68 @@ public struct AppSettings: Codable, Equatable, Sendable {
             .filter(\.isLetter)
 
         return cleaned.count == 3 ? cleaned : fallback
+    }
+}
+
+extension AppSettings {
+    private enum CodingKeys: String, CodingKey {
+        case baseCurrency
+        case quoteCurrency
+        case baseAmount
+        case activeRange
+        case refreshSeconds
+        case isCompactMode
+        case windowOriginX
+        case windowOriginY
+        case fullWindowOriginX
+        case fullWindowOriginY
+        case compactWindowOriginX
+        case compactWindowOriginY
+        case lockPosition
+        case clickThroughEnabled
+        case launchAtStartup
+        case hasStoredToken
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        baseCurrency = try container.decodeIfPresent(String.self, forKey: .baseCurrency) ?? "USD"
+        quoteCurrency = try container.decodeIfPresent(String.self, forKey: .quoteCurrency) ?? "CNY"
+        baseAmount = try container.decodeIfPresent(Decimal.self, forKey: .baseAmount) ?? 1
+        activeRange = try container.decodeIfPresent(TimeRangePreset.self, forKey: .activeRange) ?? .day
+        refreshSeconds = try container.decodeIfPresent(Int.self, forKey: .refreshSeconds) ?? 60
+        isCompactMode = try container.decodeIfPresent(Bool.self, forKey: .isCompactMode) ?? false
+        windowOriginX = try container.decodeIfPresent(Double.self, forKey: .windowOriginX)
+        windowOriginY = try container.decodeIfPresent(Double.self, forKey: .windowOriginY)
+        fullWindowOriginX = try container.decodeIfPresent(Double.self, forKey: .fullWindowOriginX)
+        fullWindowOriginY = try container.decodeIfPresent(Double.self, forKey: .fullWindowOriginY)
+        compactWindowOriginX = try container.decodeIfPresent(Double.self, forKey: .compactWindowOriginX)
+        compactWindowOriginY = try container.decodeIfPresent(Double.self, forKey: .compactWindowOriginY)
+        lockPosition = try container.decodeIfPresent(Bool.self, forKey: .lockPosition) ?? false
+        clickThroughEnabled = try container.decodeIfPresent(Bool.self, forKey: .clickThroughEnabled) ?? false
+        launchAtStartup = try container.decodeIfPresent(Bool.self, forKey: .launchAtStartup) ?? false
+        hasStoredToken = try container.decodeIfPresent(Bool.self, forKey: .hasStoredToken) ?? false
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(baseCurrency, forKey: .baseCurrency)
+        try container.encode(quoteCurrency, forKey: .quoteCurrency)
+        try container.encode(baseAmount, forKey: .baseAmount)
+        try container.encode(activeRange, forKey: .activeRange)
+        try container.encode(refreshSeconds, forKey: .refreshSeconds)
+        try container.encode(isCompactMode, forKey: .isCompactMode)
+        try container.encodeIfPresent(windowOriginX, forKey: .windowOriginX)
+        try container.encodeIfPresent(windowOriginY, forKey: .windowOriginY)
+        try container.encodeIfPresent(fullWindowOriginX, forKey: .fullWindowOriginX)
+        try container.encodeIfPresent(fullWindowOriginY, forKey: .fullWindowOriginY)
+        try container.encodeIfPresent(compactWindowOriginX, forKey: .compactWindowOriginX)
+        try container.encodeIfPresent(compactWindowOriginY, forKey: .compactWindowOriginY)
+        try container.encode(lockPosition, forKey: .lockPosition)
+        try container.encode(clickThroughEnabled, forKey: .clickThroughEnabled)
+        try container.encode(launchAtStartup, forKey: .launchAtStartup)
+        try container.encode(hasStoredToken, forKey: .hasStoredToken)
     }
 }

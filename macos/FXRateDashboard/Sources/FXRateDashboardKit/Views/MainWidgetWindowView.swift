@@ -91,24 +91,45 @@ public struct MainWidgetWindowView: View {
             }
         }
         .contextMenu {
-            Button(viewModel.toggleVisibilityMenuText) {
+            Button {
                 viewModel.setWindowVisible(!viewModel.isWindowVisible)
+            } label: {
+                Label(viewModel.toggleVisibilityMenuText, systemImage: "eye.slash")
             }
 
-            Button(viewModel.toggleModeMenuText) {
+            Button {
                 Task {
                     await viewModel.toggleCompactMode()
                 }
+            } label: {
+                Label(viewModel.toggleModeMenuText, systemImage: "arrow.up.left.and.arrow.down.right")
             }
 
-            Button("Settings") {
+            Toggle(
+                isOn: Binding(
+                    get: { viewModel.isClickThroughEnabled },
+                    set: { newValue in
+                        Task {
+                            await viewModel.setClickThroughEnabled(newValue)
+                        }
+                    }
+                )
+            ) {
+                Text(viewModel.clickThroughMenuText)
+            }
+
+            Button {
                 openSettings()
+            } label: {
+                Label("Settings", systemImage: "gearshape")
             }
 
             Divider()
 
-            Button("Quit") {
+            Button {
                 quitApplication()
+            } label: {
+                Label("Quit", systemImage: "xmark.square")
             }
         }
     }

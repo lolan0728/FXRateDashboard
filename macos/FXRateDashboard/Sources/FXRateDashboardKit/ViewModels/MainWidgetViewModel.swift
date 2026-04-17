@@ -35,6 +35,7 @@ public final class MainWidgetViewModel: ObservableObject {
     @Published public private(set) var isCompactMode = false
     @Published public private(set) var isWindowVisible = true
     @Published public private(set) var isPositionLocked = false
+    @Published public private(set) var isClickThroughEnabled = false
     @Published public private(set) var trendColor = ColorPalette.offlineTrend
     @Published public private(set) var panelBackgroundColor = ColorPalette.panelBackgroundOffline
     @Published public private(set) var chartCardBackgroundColor = ColorPalette.surfaceAltOffline
@@ -48,6 +49,7 @@ public final class MainWidgetViewModel: ObservableObject {
     public var statusChipText: String { isCompactMode ? RateMath.extractCompactStatusText(statusMessage) : statusMessage }
     public var toggleModeMenuText: String { isCompactMode ? "Restore Full Mode" : "Compact Mode" }
     public var toggleVisibilityMenuText: String { isWindowVisible ? "Hide Window" : "Show Window" }
+    public var clickThroughMenuText: String { "Click Through" }
 
     public var requestOpenSettings: (() -> Void)?
 
@@ -159,6 +161,22 @@ public final class MainWidgetViewModel: ObservableObject {
         lastCompactToggleAt = now
         currentSettings.isCompactMode.toggle()
         isCompactMode = currentSettings.isCompactMode
+        try? await settingsStore.save(currentSettings)
+    }
+
+    public func toggleClickThrough() async {
+        currentSettings.clickThroughEnabled.toggle()
+        isClickThroughEnabled = currentSettings.clickThroughEnabled
+        try? await settingsStore.save(currentSettings)
+    }
+
+    public func setClickThroughEnabled(_ isEnabled: Bool) async {
+        guard currentSettings.clickThroughEnabled != isEnabled else {
+            return
+        }
+
+        currentSettings.clickThroughEnabled = isEnabled
+        isClickThroughEnabled = isEnabled
         try? await settingsStore.save(currentSettings)
     }
 
@@ -288,6 +306,7 @@ public final class MainWidgetViewModel: ObservableObject {
         activeRange = currentSettings.activeRange
         isCompactMode = currentSettings.isCompactMode
         isPositionLocked = currentSettings.lockPosition
+        isClickThroughEnabled = currentSettings.clickThroughEnabled
     }
 
     private func setStoredWindowOrigin(x: Double, y: Double, forCompactMode: Bool) {

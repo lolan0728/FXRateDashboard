@@ -4,6 +4,8 @@ import Foundation
 
 @MainActor
 public final class WidgetWindowPlacementService {
+    private let normalWindowAlpha: CGFloat = 1.0
+    private let clickThroughWindowAlpha: CGFloat = 0.75
     private weak var window: NSWindow?
     private weak var viewModel: MainWidgetViewModel?
     private var cancellables = Set<AnyCancellable>()
@@ -48,6 +50,7 @@ public final class WidgetWindowPlacementService {
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.closeButton)?.isHidden = true
         window.collectionBehavior = [.moveToActiveSpace]
+        window.ignoresMouseEvents = viewModel.isClickThroughEnabled
         window.alphaValue = 0
         applyWindowMask(metrics: viewModel.metrics)
         applyMetrics(viewModel.metrics, animated: false)
@@ -112,6 +115,19 @@ public final class WidgetWindowPlacementService {
                 self?.window?.isMovableByWindowBackground = !isLocked
             }
             .store(in: &cancellables)
+
+        viewModel.$isClickThroughEnabled
+            .sink { [weak self] isEnabled in
+                guard let self, let window else {
+                    return
+                }
+
+                window.ignoresMouseEvents = isEnabled
+                if self.hasFinishedInitialPlacement {
+                    window.alphaValue = self.targetWindowAlpha(isClickThroughEnabled: isEnabled)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func restoreWindowFrameIfNeeded() {
@@ -127,7 +143,7 @@ public final class WidgetWindowPlacementService {
         }
 
         hasFinishedInitialPlacement = true
-        window.alphaValue = 1
+        window.alphaValue = targetWindowAlpha(isClickThroughEnabled: viewModel.isClickThroughEnabled)
         setWindowVisible(viewModel.isWindowVisible)
     }
 
@@ -231,6 +247,10 @@ public final class WidgetWindowPlacementService {
         let notificationCenter = NotificationCenter.default
         observers.forEach(notificationCenter.removeObserver)
         observers.removeAll()
+    }
+
+    private func targetWindowAlpha(isClickThroughEnabled: Bool) -> CGFloat {
+        isClickThroughEnabled ? clickThroughWindowAlpha : normalWindowAlpha
     }
 
     private func applyWindowMask(metrics: WidgetMetrics) {

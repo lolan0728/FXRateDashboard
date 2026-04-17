@@ -16,22 +16,39 @@ public struct MenuBarMenuView: View {
     }
 
     public var body: some View {
-        Button(viewModel.toggleVisibilityText) {
+        Button {
             viewModel.toggleVisibility()
+        } label: {
+            Label(viewModel.toggleVisibilityText, systemImage: "eye.slash")
         }
 
-        Button(viewModel.toggleModeText) {
+        Button {
             viewModel.toggleCompactMode()
+        } label: {
+            Label(viewModel.toggleModeText, systemImage: "arrow.up.left.and.arrow.down.right")
         }
 
-        Button("Settings") {
+        Toggle(
+            isOn: Binding(
+                get: { viewModel.isClickThroughEnabled },
+                set: { viewModel.setClickThroughEnabled($0) }
+            )
+        ) {
+            Text("Click Through")
+        }
+
+        Button {
             openSettings()
+        } label: {
+            Label("Settings", systemImage: "gearshape")
         }
 
         Divider()
 
-        Button("Quit") {
+        Button {
             quitApplication()
+        } label: {
+            Label("Quit", systemImage: "xmark.square")
         }
     }
 }
