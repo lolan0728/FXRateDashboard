@@ -68,7 +68,8 @@
                                    FontWeight="SemiBold" />
                     </Border>
 
-                    <Border DockPanel.Dock="Right"
+                    <Border x:Name="StatusChipBorder"
+                            DockPanel.Dock="Right"
                             Margin="8,0,0,0"
                             MinWidth="{Binding StatusChipMinWidth}"
                             Background="{Binding StatusChipBackgroundBrush}"
@@ -115,6 +116,8 @@
 
                         <TextBlock x:Name="CompactSourceText"
                                    DockPanel.Dock="Right"
+                                   Width="{Binding ElementName=StatusChipBorder, Path=ActualWidth}"
+                                   TextAlignment="Center"
                                    Margin="{Binding CompactSourceMargin}"
                                    VerticalAlignment="Center"
                                    Text="Wise"

@@ -197,7 +197,7 @@ public partial class MainViewModel : ObservableObject
 
     public Thickness ChangeRowMargin => IsCompactMode ? new Thickness(0, 8, 0, 0) : new Thickness(0);
 
-    public Thickness CompactSourceMargin => IsCompactMode ? new Thickness(10, 0, 6, 0) : new Thickness(12, 0, 0, 0);
+    public Thickness CompactSourceMargin => IsCompactMode ? new Thickness(8, 0, 0, 0) : new Thickness(12, 0, 0, 0);
 
     public double CompactSourceFontSize => IsCompactMode ? 10d : 11d;
 
