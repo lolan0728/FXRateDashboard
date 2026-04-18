@@ -85,6 +85,10 @@ src/FXRateDashboard
 tests/FXRateDashboard.Tests
 ```
 
-## Suggested GitHub Repository Description
+## GitHub About Text (Recommended)
 
-`Windows WPF desktop widget for live Wise exchange rates with trend charts, tray controls, and offline cache support.`
+`Live Wise FX desktop widget for Windows with real-time rates, trend charts, tray controls, compact mode, and offline cache.`
+
+## Suggested GitHub Topics
+
+`windows` `wpf` `dotnet` `foreign-exchange` `exchange-rates` `wise-api` `desktop-widget`
