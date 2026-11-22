@@ -20,6 +20,14 @@ public final class WidgetWindowPlacementService {
         persistCurrentOrigin()
     }
 
+    var windowOrigin: CGPoint? {
+        window?.frame.origin
+    }
+
+    func moveWindow(to origin: CGPoint) {
+        window?.setFrameOrigin(origin)
+    }
+
     public func bind(window: NSWindow, to viewModel: MainWidgetViewModel) {
         guard self.window !== window else {
             return
@@ -40,12 +48,12 @@ public final class WidgetWindowPlacementService {
     private func configure(window: NSWindow, viewModel: MainWidgetViewModel) {
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = false
-        window.isMovableByWindowBackground = !viewModel.isPositionLocked
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = true
         window.styleMask.remove([.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView])
         window.styleMask.insert(.borderless)
+        window.isMovableByWindowBackground = false
         window.standardWindowButton(.zoomButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.closeButton)?.isHidden = true
@@ -106,12 +114,6 @@ public final class WidgetWindowPlacementService {
         viewModel.$isWindowVisible
             .sink { [weak self] isVisible in
                 self?.setWindowVisible(isVisible)
-            }
-            .store(in: &cancellables)
-
-        viewModel.$isPositionLocked
-            .sink { [weak self] isLocked in
-                self?.window?.isMovableByWindowBackground = !isLocked
             }
             .store(in: &cancellables)
 

@@ -1,7 +1,10 @@
+import AppKit
 import SwiftUI
 
 public struct MainWidgetWindowView: View {
     @ObservedObject private var viewModel: MainWidgetViewModel
+    @GestureState private var isDraggingWindow = false
+    @State private var windowDragOffset: CGSize?
     private let windowPlacementService: WidgetWindowPlacementService
     private let openSettings: () -> Void
     private let quitApplication: () -> Void
@@ -97,6 +100,31 @@ public struct MainWidgetWindowView: View {
                 await viewModel.toggleCompactMode()
             }
         }
+        .gesture(
+            DragGesture(coordinateSpace: .global)
+                .updating($isDraggingWindow) { _, isDragging, _ in
+                    isDragging = true
+                }
+                .onChanged { value in
+                    let mouse = NSEvent.mouseLocation
+                    if windowDragOffset == nil, let origin = windowPlacementService.windowOrigin {
+                        windowDragOffset = CGSize(
+                            width: origin.x - mouse.x + value.translation.width,
+                            height: origin.y - mouse.y - value.translation.height
+                        )
+                    }
+                    if let offset = windowDragOffset {
+                        windowPlacementService.moveWindow(to: CGPoint(x: mouse.x + offset.width, y: mouse.y + offset.height))
+                    }
+                },
+            isEnabled: !viewModel.isPositionLocked && !viewModel.isClickThroughEnabled
+        )
+        .onChange(of: isDraggingWindow) { _, isDragging in
+            if !isDragging {
+                windowDragOffset = nil
+            }
+        }
+        .allowsWindowActivationEvents(true)
         .contextMenu {
             Button {
                 viewModel.setWindowVisible(!viewModel.isWindowVisible)
